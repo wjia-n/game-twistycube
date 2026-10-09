@@ -275,7 +275,6 @@ class _SettingsScreenState extends State<SettingsScreen>
   }
 
   Widget _themesTab(CubeThemeDef theme) {
-    final s = widget.settings;
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Column(

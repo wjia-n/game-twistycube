@@ -66,7 +66,6 @@ const cubeTiers = [
 /// Doubled-integer sticker coordinates. Centers live on the odd lattice,
 /// face planes at +/-n. Shared with the painter so animation and logic
 /// always agree on geometry.
-@visibleForTesting
 List<int> stickerCoords(int index, int n) {
   final g = n - 1;
   final f = index ~/ (n * n);
