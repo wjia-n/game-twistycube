@@ -34,12 +34,6 @@ class _ProScreenState extends State<ProScreen> {
     if (mounted) setState(() => _loading = false);
   }
 
-    if (_store.proPurchased.value) {
-      widget.settings.setPro(true);
-      widget.audio.win();
-    }
-  }
-
   void _onThanks() {
     final msg = _store.lastThanks.value;
     if (msg != null && mounted) {
