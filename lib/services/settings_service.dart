@@ -66,7 +66,7 @@ class CubeSettings extends ChangeNotifier {
   int gamesPlayed = 0;
   final List<int> bestTimeMs = [0, 0, 0]; // per tier, 0 = none yet
   final List<int> bestMoves = [0, 0, 0]; // per tier, 0 = none yet
-  bool isPro = false;
+  bool isPro = true; // everything unlocked — no Pro version
 
   /// Custom theme face colors (ARGB ints, U,R,F,D,B,L order).
   List<int> customFaces = List.of(_defaultCustomFaces);
@@ -115,7 +115,7 @@ class CubeSettings extends ChangeNotifier {
       bestTimeMs[i] = p.getInt('$_kBestTime$i') ?? 0;
       bestMoves[i] = p.getInt('$_kBestMoves$i') ?? 0;
     }
-    isPro = p.getBool(_kIsPro) ?? false;
+    isPro = true; // everything unlocked
     for (int i = 0; i < 6; i++) {
       customFaces[i] = p.getInt('$_kCustomFace$i') ?? _defaultCustomFaces[i];
     }
