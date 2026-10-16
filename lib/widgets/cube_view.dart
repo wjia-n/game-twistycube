@@ -252,7 +252,9 @@ class _CubePainter extends CustomPainter {
     final n = size;
     final h = (n - 1) / 2.0;
     final plane = n / 2.0;
-    const gap = 0.07;
+    // Wide, clearly-visible gaps so every cubie reads as its own box even
+    // when neighbours share its color (solved faces).
+    const gap = 0.13;
     final tileHalf = 0.5 - gap;
 
     // Turn-animation rotation for the active layer. The engine has already
@@ -356,7 +358,8 @@ class _CubePainter extends CustomPainter {
     }
 
     _items.sort((a, b) => a.depth.compareTo(b.depth));
-    final k = min(sizePx.width, sizePx.height) / (n * 2.35);
+    // Larger on screen so every cubie is clearly visible.
+    final k = min(sizePx.width, sizePx.height) / (n * 2.15);
     for (final it in _items) {
       it.draw(canvas, k);
     }
@@ -385,33 +388,40 @@ class _CubePainter extends CustomPainter {
   void _drawSticker(Canvas canvas, List<Offset> pts, Color fill, Color base,
       bool selected) {
     final path = _stickerPath(pts);
-    // Drop shadow under the tile for physical depth.
+    // Deep drop shadow under the tile for strong physical depth — each
+    // cubie must read as a separate raised box.
     canvas.drawPath(
-      path.shift(const Offset(0, 2.5)),
-      Paint()..color = Colors.black.withValues(alpha: 0.28),
+      path.shift(const Offset(0, 3.5)),
+      Paint()..color = Colors.black.withValues(alpha: 0.45),
     );
     canvas.drawPath(path, Paint()..color = fill);
-    // Top-light bevel: lighter inner edge.
-    final bevel = Path()..addPolygon([pts[0], pts[1]], false);
-    canvas.drawPath(
-        bevel,
-        Paint()
-          ..color = Colors.white.withValues(alpha: 0.35)
-          ..strokeWidth = 2
-          ..style = PaintingStyle.stroke);
-    // Outline.
+    // Full 3D bevel: light on top/left edges, dark on bottom/right edges.
+    // This gives every tile a raised physical-box look from any angle.
+    final tl = Paint()
+      ..color = Colors.white.withValues(alpha: 0.5)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+    final br = Paint()
+      ..color = Colors.black.withValues(alpha: 0.4)
+      ..strokeWidth = 2.5
+      ..style = PaintingStyle.stroke;
+    canvas.drawPath(Path()..addPolygon([pts[0], pts[1]], false), tl);
+    canvas.drawPath(Path()..addPolygon([pts[3], pts[0]], false), tl);
+    canvas.drawPath(Path()..addPolygon([pts[1], pts[2]], false), br);
+    canvas.drawPath(Path()..addPolygon([pts[2], pts[3]], false), br);
+    // Strong crisp outline so neighbouring same-color tiles stay distinct.
     canvas.drawPath(
         path,
         Paint()
-          ..color = Colors.black.withValues(alpha: 0.35)
-          ..strokeWidth = 1.2
+          ..color = Colors.black.withValues(alpha: 0.7)
+          ..strokeWidth = 2.2
           ..style = PaintingStyle.stroke);
     if (selected) {
       canvas.drawPath(
           path,
           Paint()
             ..color = accent
-            ..strokeWidth = 3
+            ..strokeWidth = 3.5
             ..style = PaintingStyle.stroke);
     }
   }
