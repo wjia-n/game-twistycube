@@ -5,6 +5,7 @@ import '../theme/cube_themes.dart';
 import '../widgets/ui_bits.dart';
 import 'custom_theme_screen.dart';
 import 'pro_screen.dart';
+import '../transfer/transfer_ui.dart';
 
 /// Settings: audio toggles + volume, player name, sticker styles.
 /// Second tab: the theme picker (12 themes + custom creator).
@@ -101,6 +102,7 @@ class _SettingsScreenState extends State<SettingsScreen>
       padding: const EdgeInsets.all(16),
       child: Column(
         children: [
+              TransferSaveTile(gameSlug: 'twistycube'),
           PanelCard(
             theme: theme,
             child: Column(
