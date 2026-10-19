@@ -1,5 +1,8 @@
 name: Build APK, AAB and Web
 
+permissions:
+  contents: write
+
 on:
   push:
     tags:
