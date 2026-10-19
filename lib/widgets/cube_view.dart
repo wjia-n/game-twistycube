@@ -295,19 +295,12 @@ class _CubePainter extends CustomPainter {
         _add(fc, _add(_mul(U, -plane), _mul(V, -plane))),
         _add(fc, _add(_mul(U, plane), _mul(V, -plane))),
       ];
-      final plateDepth = _view(fc)[2];
-      _items.add(_DrawItem(
-        depth: plateDepth - 0.01,
-        face: f,
-        draw: (canvas, k) {
-          final pts = [
-            for (final c3 in plateCorners) _proj(_view(c3), sizePx, k)
-          ];
-          final path = Path()..addPolygon(pts, true);
-          canvas.drawPath(
-              path, Paint()..color = const Color(0xFF2A2118));
-        },
-      ));
+      // The plate must sit strictly behind every sticker of its own face.
+      // Tiles are coplanar with the plate, so a fixed center-depth epsilon
+      // lets the plate occlude the far-side stickers of a tilted face
+      // (they read as blank/dark). Track the nearest sticker depth instead.
+      final faceItems = <_DrawItem>[];
+      var faceMinDepth = double.infinity;
 
       for (int r = 0; r < n; r++) {
         for (int c = 0; c < n; c++) {
@@ -333,28 +326,40 @@ class _CubePainter extends CustomPainter {
           final base = faces[stickers[idx]];
           final shaded = _shade(base, bright);
           final isSel = f == selectedFace;
-          _items.add(_DrawItem(
-            depth: depth,
-            face: f,
-            draw: (canvas, k) {
-              final pts = [
-                for (final p in vc) _proj(p, sizePx, k),
-              ];
-              _drawSticker(canvas, pts, shaded, base, isSel);
-            },
-            hitQuad: null, // filled below after projection scale is known
-          ));
+          if (depth < faceMinDepth) faceMinDepth = depth;
+          void draw(Canvas canvas, double k) {
+            final pts = [
+              for (final p in vc) _proj(p, sizePx, k),
+            ];
+            _drawSticker(canvas, pts, shaded, base, isSel);
+          }
           // Store unscaled projected points for hit-testing later.
-          _items.last = _DrawItem(
+          faceItems.add(_DrawItem(
             depth: depth,
             face: f,
-            draw: _items.last.draw,
+            draw: draw,
             hitQuad: vc
                 .map((p) => Offset(p[0], -p[1]))
                 .toList(), // view-space, pre-scale
-          );
+          ));
         }
       }
+
+      // Face plate (dark body showing through the gaps) — drawn behind all
+      // of this face's stickers so no tile is ever occluded by its plate.
+      _items.add(_DrawItem(
+        depth: faceMinDepth - 0.01,
+        face: f,
+        draw: (canvas, k) {
+          final pts = [
+            for (final c3 in plateCorners) _proj(_view(c3), sizePx, k)
+          ];
+          final path = Path()..addPolygon(pts, true);
+          canvas.drawPath(
+              path, Paint()..color = const Color(0xFF2A2118));
+        },
+      ));
+      _items.addAll(faceItems);
     }
 
     _items.sort((a, b) => a.depth.compareTo(b.depth));
